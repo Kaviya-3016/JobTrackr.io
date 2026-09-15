@@ -1,0 +1,330 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Night Mode (Black & Cosmic Plum Canvas) */
+  html.dark body {
+    background-color: #06030a;
+    background-image: 
+      radial-gradient(circle at 10% 15%, rgba(131, 58, 180, 0.28) 0%, transparent 42%),
+      radial-gradient(circle at 90% 18%, rgba(225, 48, 108, 0.25) 0%, transparent 45%),
+      radial-gradient(circle at 50% 55%, rgba(245, 96, 64, 0.14) 0%, transparent 48%),
+      radial-gradient(circle at 85% 85%, rgba(131, 58, 180, 0.22) 0%, transparent 42%),
+      radial-gradient(circle at 15% 85%, rgba(225, 48, 108, 0.18) 0%, transparent 40%);
+    background-attachment: fixed;
+    color: #fce7f3;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Day Mode (Pure White Canvas with Warm Daytime Instagram Radiance) */
+  html.light body,
+  html:not(.dark) body {
+    background-color: #ffffff;
+    background-image: 
+      radial-gradient(circle at 8% 12%, rgba(254, 240, 138, 0.42) 0%, transparent 38%),
+      radial-gradient(circle at 92% 16%, rgba(254, 205, 211, 0.48) 0%, transparent 44%),
+      radial-gradient(circle at 50% 50%, rgba(254, 215, 170, 0.22) 0%, transparent 45%),
+      radial-gradient(circle at 85% 85%, rgba(243, 232, 255, 0.55) 0%, transparent 42%),
+      radial-gradient(circle at 12% 88%, rgba(252, 231, 243, 0.5) 0%, transparent 40%);
+    background-attachment: fixed;
+    color: #0f172a;
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+}
+
+/* Custom Text Selections */
+html.dark ::selection {
+  background: rgba(225, 48, 108, 0.45);
+  color: #ffffff;
+}
+
+html.light ::selection {
+  background: rgba(225, 48, 108, 0.25);
+  color: #831843;
+}
+
+/* Custom Instagram modern scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(225, 48, 108, 0.3);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(225, 48, 108, 0.6);
+}
+
+/* Instagram Glassmorphism card utilities */
+.glass-card {
+  background: rgba(24, 13, 43, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(225, 48, 108, 0.18);
+}
+
+.glass-card-hover {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-card-hover:hover {
+  border-color: rgba(245, 96, 64, 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -10px rgba(225, 48, 108, 0.3);
+}
+
+/* Iconic Instagram Gradient Utilities */
+.ig-gradient {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+
+.ig-gradient-btn {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.ig-gradient-btn:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 8px 24px -4px rgba(225, 48, 108, 0.45);
+}
+
+.ig-gradient-text {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
+
+.ig-gradient-subtle {
+  background: linear-gradient(135deg, rgba(240, 148, 51, 0.15) 0%, rgba(220, 39, 67, 0.15) 50%, rgba(188, 24, 136, 0.15) 100%);
+  border: 1px solid rgba(220, 39, 67, 0.3);
+}
+
+.ig-border-glow {
+  box-shadow: 0 0 18px rgba(225, 48, 108, 0.25);
+}
+
+/* Heatmap day box styles */
+.heatmap-cell {
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.3);
+  z-index: 10;
+  filter: brightness(1.25);
+}
+
+/* ============================================================
+   DAY THEME OVERRIDES (Crisp White + Instagram Accents)
+   ============================================================ */
+
+/* All Main Cards and Container Dark Backgrounds in Day Mode */
+html.light [class*="bg-[#12081f]"],
+html.light [class*="bg-[#130826]"],
+html.light [class*="bg-[#140b25]"],
+html.light [class*="bg-[#150d24]"],
+html.light [class*="bg-[#160829]"],
+html.light [class*="bg-[#170e28]"],
+html.light [class*="bg-[#180e2d]"],
+html.light [class*="bg-[#180e2f]"],
+html.light [class*="bg-[#190d2e]"],
+html.light [class*="bg-[#1c0d38]"],
+html.light [class*="bg-[#240d34]"],
+html.light [class*="bg-[#0c0617]"],
+html.light [class*="bg-slate-900"],
+html.light .glass-card {
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(225, 48, 108, 0.18) !important;
+  box-shadow: 0 4px 20px -2px rgba(225, 48, 108, 0.07), 0 2px 6px -1px rgba(0, 0, 0, 0.03) !important;
+  color: #0f172a !important;
+}
+
+/* Inner Pill / Chip / Sub-containers in Day Mode */
+html.light [class*="bg-[#1c1032]"],
+html.light [class*="bg-[#201138]"],
+html.light [class*="bg-[#211138]"],
+html.light [class*="bg-[#22123d]"],
+html.light [class*="bg-[#22133b]"],
+html.light [class*="bg-[#22133d]"],
+html.light [class*="bg-[#24133b]"],
+html.light [class*="bg-[#241342]"],
+html.light [class*="bg-[#241442]"],
+html.light [class*="bg-[#25102a]"],
+html.light [class*="bg-[#2b174d]"],
+html.light [class*="bg-[#2c174f]"],
+html.light [class*="bg-[#2d1850]"],
+html.light [class*="bg-[#301b57]"],
+html.light [class*="bg-slate-800"] {
+  background-color: #fdf5f9 !important;
+  border-color: rgba(225, 48, 108, 0.18) !important;
+  color: #1e293b !important;
+}
+
+/* Gradient Container Overrides in Day Mode */
+html.light [class*="from-[#1c0d38]"],
+html.light [class*="from-[#1c0f30]"],
+html.light [class*="from-[#160829]"] {
+  background-image: linear-gradient(135deg, #ffffff 0%, #fff5f8 100%) !important;
+  background-color: #ffffff !important;
+  border-color: rgba(225, 48, 108, 0.22) !important;
+  color: #0f172a !important;
+}
+
+/* Day Mode Text Adjustments */
+html.light .text-white:not(button):not(button *):not(a):not(a *):not(.ig-gradient-btn):not([class*="from-[#f09433]"]):not([class*="from-[#e1306c]"]):not([class*="from-purple-600"]):not([class*="from-amber-500"]) {
+  color: #0f172a !important;
+}
+
+html.light .text-slate-100 {
+  color: #1e293b !important;
+}
+
+html.light .text-slate-200 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-300,
+html.light .text-slate-300\/80,
+html.light .text-slate-300\/90 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-400 {
+  color: #64748b !important;
+}
+
+html.light .text-pink-100,
+html.light .text-pink-200,
+html.light .text-pink-200\/60,
+html.light .text-pink-200\/70,
+html.light .text-pink-200\/80,
+html.light .text-pink-200\/90 {
+  color: #1e293b !important;
+}
+
+html.light .text-pink-300,
+html.light .text-pink-300\/60,
+html.light .text-pink-300\/70,
+html.light .text-pink-300\/80 {
+  color: #be185d !important;
+}
+
+/* Day Mode Form Inputs */
+html.light input:not([type="checkbox"]):not([type="radio"]),
+html.light textarea,
+html.light select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(225, 48, 108, 0.28) !important;
+}
+
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Day Mode Table Hover & Headers */
+html.light tbody tr:hover {
+  background-color: #fdf2f7 !important;
+}
+
+html.light table th {
+  background-color: #fcf4f8 !important;
+  color: #831843 !important;
+  border-color: rgba(225, 48, 108, 0.15) !important;
+}
+
+html.light table td {
+  border-color: rgba(225, 48, 108, 0.12) !important;
+}
+
+/* Day Mode Modals */
+html.light .fixed.bg-\[\#0a0515\]\/85,
+html.light .fixed.bg-\[\#0a0515\]\/90,
+html.light .fixed.bg-slate-950\/80,
+html.light .fixed.bg-slate-950\/85 {
+  background-color: rgba(15, 23, 42, 0.5) !important;
+}
+
+html.light .w-full.max-w-md,
+html.light .w-full.max-w-lg,
+html.light .w-full.max-w-xl,
+html.light .w-full.max-w-2xl,
+html.light .w-full.max-w-4xl {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Day Mode Sidebar & Nav Buttons */
+html.light aside {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(225, 48, 108, 0.15) !important;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.02) !important;
+}
+
+html.light aside button {
+  color: #475569 !important;
+}
+
+html.light aside button:hover {
+  background-color: #fdf2f7 !important;
+  color: #0f172a !important;
+}
+
+html.light aside button[class*="from-amber-500/20"] {
+  background-color: #fce7f3 !important;
+  color: #9d174d !important;
+  border-color: rgba(225, 48, 108, 0.35) !important;
+}
+
+html.light aside button[class*="from-amber-500/20"] svg {
+  color: #e1306c !important;
+}
+
+html.light [class*="from-[#1c0f30]"] {
+  --tw-gradient-from: #fff5f8 !important;
+  --tw-gradient-to: #faf0fc !important;
+  background-image: linear-gradient(to bottom right, #fff5f8, #faf0fc) !important;
+  border-color: rgba(225, 48, 108, 0.25) !important;
+  box-shadow: 0 4px 15px -2px rgba(225, 48, 108, 0.08) !important;
+}
+
+html.light [class*="from-[#1c0f30]"] .text-pink-100 {
+  color: #0f172a !important;
+}
+
+html.light [class*="from-[#1c0f30]"] .text-pink-200 {
+  color: #334155 !important;
+}
+
+html.light [class*="from-[#1c0f30]"] .text-pink-200\/60 {
+  color: #64748b !important;
+}
+
+/* Crucial: Retain Pure White Text on Buttons & Gradient Badges */
+html.light button[class*="bg-gradient-"],
+html.light a[class*="bg-gradient-"],
+html.light .ig-gradient-btn,
+html.light button[class*="bg-gradient-"] *,
+html.light a[class*="bg-gradient-"] *,
+html.light .ig-gradient-btn * {
+  color: #ffffff !important;
+}
+
+html.light .bg-clip-text,
+html.light .ig-gradient-text {
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+}
