@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Navbar } from './components/layout/Navbar';
 import { Sidebar } from './components/layout/Sidebar';
 import type { NavTab } from './components/layout/Sidebar';
@@ -9,7 +9,10 @@ import { ResumesPage } from './pages/ResumesPage';
 import { InterviewsPage } from './pages/InterviewsPage';
 import { WaitlistPage } from './pages/WaitlistPage';
 import { ExportPage } from './pages/ExportPage';
+import { HomePage } from './pages/HomePage';
+import { ContributePage } from './pages/ContributePage';
 
+import { AuthModal } from './components/auth/AuthModal';
 import { ApplicationModal } from './components/applications/ApplicationModal';
 import { InterviewModal } from './components/interviews/InterviewModal';
 import { RejectionFeedbackModal } from './components/interviews/RejectionFeedbackModal';
@@ -29,8 +32,15 @@ import { api } from './services/api';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function App() {
+  const [currentView, setCurrentView] = useState<'home' | 'app'>('home');
   const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
   const [user, setUser] = useState<User | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Auth Modal State
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signin');
+
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     const saved = localStorage.getItem('jobtrackr_theme');
     return saved === 'light' ? 'light' : 'dark';
@@ -83,23 +93,32 @@ export function App() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Initial load
+  // Initial load: verify session token
   useEffect(() => {
     fetchInitialData();
   }, []);
 
   const fetchInitialData = async () => {
     try {
-      // Auto-login / verify session as Kavi
-      const authRes = await api.login('kaviyamurugan3016@gmail.com', 'password123');
-      if (authRes.token) {
-        localStorage.setItem('token', authRes.token);
-        setUser(authRes.user);
+      const token = localStorage.getItem('token');
+      if (token) {
+        const meRes = await api.getMe();
+        if (meRes.user) {
+          setUser(meRes.user);
+          setCurrentView('app');
+          await refreshAll();
+          return;
+        }
       }
-
-      await refreshAll();
+      // No active session -> show landing home page
+      setCurrentView('home');
     } catch (err) {
-      console.error('Failed to initialize app', err);
+      console.warn('Session verification fallback to home page', err);
+      localStorage.removeItem('token');
+      setUser(null);
+      setCurrentView('home');
+    } finally {
+      setIsInitializing(false);
     }
   };
 
@@ -125,262 +144,374 @@ export function App() {
     }
   };
 
+  const handleOpenAuth = (mode: 'signin' | 'signup') => {
+    setAuthModalMode(mode);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = async (authenticatedUser: User, message?: string) => {
+    setUser(authenticatedUser);
+    setCurrentView('app');
+    await refreshAll();
+    showToast(message || `Welcome, ${authenticatedUser.name}!`);
+  };
+
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+    } catch {
+      // ignore
+    }
+    setUser(null);
+    setApplications([]);
+    setResumes([]);
+    setInterviews([]);
+    setWaitlist([]);
+    setAnalytics(null);
+    setHeatmapDays([]);
+    setCurrentView('home');
+    showToast('Signed out successfully');
+  };
+
+  const handleGoHome = () => {
+    setCurrentView('home');
+  };
+
+  const handleGoToDashboard = () => {
+    if (user) {
+      setCurrentView('app');
+    } else {
+      handleOpenAuth('signin');
+    }
+  };
+
   const activeResume = resumes.find(r => Boolean(r.is_active)) || resumes[0] || null;
 
   // Application Handlers
-  const handleSaveApp = async (data: Partial<JobApplication>) => {
-    if (editingApp) {
-      const res = await api.updateApplication(editingApp.id, data);
-      showToast(`Updated Application #${editingApp.s_no} (${res.application.company_name})`);
-    } else {
-      const res = await api.createApplication(data);
-      showToast(`Application #${res.application.s_no} for ${res.application.company_name} created!`);
+  const handleSaveApp = async (data: any) => {
+    try {
+      if (editingApp) {
+        await api.updateApplication(editingApp.id, data);
+        showToast('Application updated successfully');
+      } else {
+        await api.createApplication(data);
+        showToast('Application added successfully');
+      }
+      setIsAppModalOpen(false);
+      setEditingApp(null);
+      await refreshAll();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save application', 'error');
     }
-    setEditingApp(null);
-    await refreshAll();
   };
 
   const handleDeleteApp = async (id: string) => {
-    await api.deleteApplication(id);
-    showToast('Application deleted successfully');
-    await refreshAll();
+    if (!window.confirm('Are you sure you want to delete this application record?')) return;
+    try {
+      await api.deleteApplication(id);
+      showToast('Application deleted');
+      await refreshAll();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to delete application', 'error');
+    }
   };
 
-  const handleStatusChange = async (id: string, status: JobApplication['application_status']) => {
-    await api.updateApplication(id, { application_status: status });
-    showToast(`Status updated to ${status}`);
-    await refreshAll();
-  };
 
   // Interview Handlers
-  const handleSaveInterview = async (data: Partial<Interview> & { company_name?: string; role_applied?: string; location?: string }) => {
-    if (editingInterview && editingInterview.id) {
-      await api.updateInterview(editingInterview.id, data);
-      showToast('Interview updated successfully');
-    } else {
-      await api.createInterview(data);
-      showToast(data.is_walk_in ? 'Walk-in drive logged!' : 'Interview scheduled & tracked!');
+  const handleSaveInterview = async (data: any) => {
+    try {
+      if (editingInterview) {
+        await api.updateInterview(editingInterview.id, data);
+        showToast('Interview round updated');
+      } else {
+        await api.createInterview(data);
+        showToast('Interview round scheduled');
+      }
+      setIsInterviewModalOpen(false);
+      setEditingInterview(null);
+      await refreshAll();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save interview', 'error');
     }
-    setEditingInterview(null);
-    await refreshAll();
   };
 
   const handleDeleteInterview = async (id: string) => {
-    await api.deleteInterview(id);
-    showToast('Interview deleted');
-    await refreshAll();
+    if (!window.confirm('Delete this interview round?')) return;
+    try {
+      await api.deleteInterview(id);
+      showToast('Interview deleted');
+      await refreshAll();
+    } catch (err: any) {
+      showToast('Failed to delete interview', 'error');
+    }
   };
 
-  const handleSaveFeedback = async (
-    interviewId: string,
-    feedback: { rejection_reason: string; detailed_notes: string; improvement_suggestions?: string }
-  ) => {
-    await api.addInterviewFeedback(interviewId, feedback);
-    showToast('Constructive rejection feedback recorded');
-    await refreshAll();
+  const handleSaveFeedback = async (interviewId: string, feedback: {
+    rejection_reason: string;
+    detailed_notes: string;
+    improvement_suggestions?: string;
+  }) => {
+    try {
+      await api.addInterviewFeedback(interviewId, feedback);
+      showToast('Feedback & AI tips recorded');
+      setIsFeedbackModalOpen(false);
+      setFeedbackInterview(null);
+      await refreshAll();
+    } catch {
+      showToast('Failed to record feedback', 'error');
+    }
   };
 
   // Waitlist Handlers
-  const handleSaveWaitlist = async (data: Partial<WaitlistJob>) => {
-    if (editingWaitlist) {
-      await api.updateWaitlistJob(editingWaitlist.id, data);
-      showToast('Wishlist item updated');
-    } else {
-      await api.createWaitlistJob(data);
-      showToast('Added to Wishlist queue');
+  const handleSaveWaitlist = async (data: any) => {
+    try {
+      if (editingWaitlist) {
+        await api.updateWaitlist(editingWaitlist.id, data);
+        showToast('Bookmark updated');
+      } else {
+        await api.createWaitlist(data);
+        showToast('Opportunity saved to waitlist');
+      }
+      setIsWaitlistModalOpen(false);
+      setEditingWaitlist(null);
+      await refreshAll();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to save waitlist entry', 'error');
     }
-    setEditingWaitlist(null);
-    await refreshAll();
   };
 
   const handleDeleteWaitlist = async (id: string) => {
-    await api.deleteWaitlistJob(id);
-    showToast('Removed from wishlist');
-    await refreshAll();
+    if (!window.confirm('Remove from waitlist?')) return;
+    try {
+      await api.deleteWaitlist(id);
+      showToast('Waitlist opportunity deleted');
+      await refreshAll();
+    } catch (err: any) {
+      showToast('Failed to delete waitlist entry', 'error');
+    }
   };
 
   const handleConvertWaitlist = async (id: string) => {
-    const res = await api.convertWaitlistToApp(id);
-    showToast(res.message);
-    await refreshAll();
-    setCurrentTab('applications');
+    try {
+      await api.convertWaitlistToApp(id);
+      showToast('Converted to Active Application!');
+      await refreshAll();
+      setCurrentTab('applications');
+    } catch (err: any) {
+      showToast(err.message || 'Failed to convert to application', 'error');
+    }
   };
 
   // Resume Handlers
   const handleSetActiveResume = async (id: string) => {
-    await api.setActiveResume(id);
-    showToast('Active resume designated');
-    await refreshAll();
+    try {
+      await api.setActiveResume(id);
+      showToast('Primary active resume updated');
+      await refreshAll();
+    } catch (err: any) {
+      showToast('Failed to set active resume', 'error');
+    }
   };
 
   const handleDeleteResume = async (id: string) => {
-    await api.deleteResume(id);
-    showToast('Resume removed');
-    await refreshAll();
+    if (!window.confirm('Delete this resume?')) return;
+    try {
+      await api.deleteResume(id);
+      showToast('Resume deleted');
+      await refreshAll();
+    } catch (err: any) {
+      showToast('Failed to delete resume', 'error');
+    }
   };
 
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen bg-[#0a0414] flex items-center justify-center text-pink-200">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-pink-500 border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-semibold tracking-wider uppercase text-pink-300">Loading JobTrackr.io...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-transparent text-slate-100 flex flex-col selection:bg-pink-500/30 selection:text-pink-100">
+    <div className="min-h-screen bg-[#0a0612] text-slate-100 flex flex-col font-sans transition-colors duration-200">
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-50 animate-slide-up">
-          <div
-            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-2xl border text-xs font-medium backdrop-blur-md ${
-              toast.type === 'error'
-                ? 'bg-rose-950/90 border-rose-800 text-rose-200'
-                : 'bg-[#1e0f33]/95 border-pink-500/40 text-pink-200 shadow-pink-500/20'
-            }`}
-          >
-            {toast.type === 'error' ? (
-              <AlertCircle className="w-4 h-4 text-rose-400" />
-            ) : (
-              <CheckCircle2 className="w-4 h-4 text-pink-400" />
-            )}
-            <span>{toast.message}</span>
-          </div>
+        <div
+          className={`fixed top-4 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md border animate-bounce ${
+            toast.type === 'error'
+              ? 'bg-red-950/80 border-red-500/50 text-red-200'
+              : 'bg-gradient-to-r from-purple-900/90 to-pink-900/90 border-pink-500/40 text-pink-100 shadow-pink-950/50'
+          }`}
+        >
+          {toast.type === 'error' ? (
+            <AlertCircle className="w-4 h-4 text-red-400" />
+          ) : (
+            <CheckCircle2 className="w-4 h-4 text-pink-400" />
+          )}
+          <span className="text-xs font-semibold">{toast.message}</span>
         </div>
       )}
 
-      {/* Top Navbar */}
-      <Navbar
-        user={user}
-        activeResume={activeResume}
-        theme={theme}
-        onToggleTheme={toggleTheme}
-        onNewApplication={() => {
-          setEditingApp(null);
-          setIsAppModalOpen(true);
-        }}
-        onViewResume={(r) => setViewingResume(r)}
-      />
-
-      {/* Main Body */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar
-          currentTab={currentTab}
-          onSelectTab={setCurrentTab}
-          appCount={applications.length}
-          offerCount={analytics?.offers || 0}
-          interviewCount={interviews.length}
+      {/* View Switcher: Landing Home Page vs Dashboard App */}
+      {currentView === 'home' ? (
+        <HomePage
+          user={user}
+          onOpenAuth={handleOpenAuth}
+          onGoToDashboard={handleGoToDashboard}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
+      ) : (
+        <>
+          {/* Main App Navbar */}
+          <Navbar
+            user={user}
+            activeResume={activeResume}
+            onNewApplication={() => {
+              setEditingApp(null);
+              setIsAppModalOpen(true);
+            }}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onGoHome={handleGoHome}
+            onOpenAuth={handleOpenAuth}
+            onLogout={handleLogout}
+          />
 
-        {/* Content Area */}
-        <main className="flex-1 p-6 overflow-y-auto max-h-[calc(100vh-61px)]">
-          {currentTab === 'dashboard' && (
-            <DashboardPage
-              analytics={analytics}
-              applications={applications}
-              interviews={interviews}
-              onNavigateTab={setCurrentTab}
-              onOpenNewApp={() => {
-                setEditingApp(null);
-                setIsAppModalOpen(true);
-              }}
-              onEditApp={(app) => {
-                setEditingApp(app);
-                setIsAppModalOpen(true);
-              }}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Sidebar Navigation */}
+            <Sidebar
+              currentTab={currentTab}
+              onSelectTab={setCurrentTab}
+              appCount={applications.length}
+              offerCount={applications.filter(a => a.application_status === 'Offer').length}
+              interviewCount={interviews.length}
             />
-          )}
 
-          {currentTab === 'applications' && (
-            <ApplicationsPage
-              applications={applications}
-              resumes={resumes}
-              onOpenNewApp={() => {
-                setEditingApp(null);
-                setIsAppModalOpen(true);
-              }}
-              onEditApp={(app) => {
-                setEditingApp(app);
-                setIsAppModalOpen(true);
-              }}
-              onDeleteApp={handleDeleteApp}
-              onLogInterviewForApp={(app) => {
-                setEditingInterview({
-                  id: '',
-                  job_application_id: app.id,
-                  company_name: app.company_name,
-                  role_applied: app.role_applied,
-                  job_location: app.job_location,
-                  location: app.job_location,
-                  interview_date: new Date().toISOString().split('T')[0],
-                  interview_type: 'Virtual (Google Meet)',
-                  interview_status: 'Scheduled',
-                  is_walk_in: 0,
-                  resume_used_id: app.resume_used_id
-                } as Interview);
-                setInterviewModalType('interview');
-                setIsInterviewModalOpen(true);
-              }}
-              onStatusChange={handleStatusChange}
-              onViewResume={(r) => setViewingResume(r)}
-            />
-          )}
+            {/* Main Tab Content */}
+            <main className="flex-1 overflow-y-auto p-4 md:p-8 bg-[#0a0612]/60 transition-colors duration-200">
+              {currentTab === 'dashboard' && (
+                <DashboardPage
+                  analytics={analytics}
+                  applications={applications}
+                  interviews={interviews}
+                  onNavigateTab={setCurrentTab}
+                  onOpenNewApp={() => {
+                    setEditingApp(null);
+                    setIsAppModalOpen(true);
+                  }}
+                  onEditApp={(app) => {
+                    setEditingApp(app);
+                    setIsAppModalOpen(true);
+                  }}
+                />
+              )}
 
-          {currentTab === 'analytics' && (
-            <AnalyticsPage
-              overview={analytics}
-              heatmapDays={heatmapDays}
-            />
-          )}
+              {currentTab === 'applications' && (
+                <ApplicationsPage
+                  applications={applications}
+                  resumes={resumes}
+                  onOpenNewApp={() => {
+                    setEditingApp(null);
+                    setIsAppModalOpen(true);
+                  }}
+                  onEditApp={(app) => {
+                    setEditingApp(app);
+                    setIsAppModalOpen(true);
+                  }}
+                  onDeleteApp={handleDeleteApp}
+                  onLogInterviewForApp={(_app) => {
+                    setEditingInterview(null);
+                    setIsInterviewModalOpen(true);
+                  }}
+                  onStatusChange={async (id, status) => {
+                    await api.updateApplication(id, { application_status: status });
+                    await refreshAll();
+                  }}
+                  onViewResume={(r) => setViewingResume(r)}
+                />
+              )}
 
-          {currentTab === 'resumes' && (
-            <ResumesPage
-              resumes={resumes}
-              onUploadSuccess={refreshAll}
-              onSetActive={handleSetActiveResume}
-              onDeleteResume={handleDeleteResume}
-              onViewResume={(r) => setViewingResume(r)}
-            />
-          )}
+              {currentTab === 'analytics' && (
+                <AnalyticsPage
+                  overview={analytics}
+                  heatmapDays={heatmapDays}
+                />
+              )}
 
-          {currentTab === 'interviews' && (
-            <InterviewsPage
-              interviews={interviews}
-              applications={applications}
-              resumes={resumes}
-              onOpenNewInterview={(mode) => {
-                setEditingInterview(null);
-                setInterviewModalType(mode || 'interview');
-                setIsInterviewModalOpen(true);
-              }}
-              onEditInterview={(iv) => {
-                setEditingInterview(iv);
-                setInterviewModalType(iv.is_walk_in ? 'walk-in' : 'interview');
-                setIsInterviewModalOpen(true);
-              }}
-              onDeleteInterview={handleDeleteInterview}
-              onOpenFeedback={(iv) => {
-                setFeedbackInterview(iv);
-                setIsFeedbackModalOpen(true);
-              }}
-              onViewResume={(r) => setViewingResume(r)}
-            />
-          )}
+              {currentTab === 'resumes' && (
+                <ResumesPage
+                  resumes={resumes}
+                  onUploadSuccess={refreshAll}
+                  onSetActive={handleSetActiveResume}
+                  onDeleteResume={handleDeleteResume}
+                  onViewResume={(r) => setViewingResume(r)}
+                />
+              )}
 
-          {currentTab === 'waitlist' && (
-            <WaitlistPage
-              waitlist={waitlist}
-              onOpenNewWaitlist={() => {
-                setEditingWaitlist(null);
-                setIsWaitlistModalOpen(true);
-              }}
-              onEditWaitlist={(item) => {
-                setEditingWaitlist(item);
-                setIsWaitlistModalOpen(true);
-              }}
-              onDeleteWaitlist={handleDeleteWaitlist}
-              onConvertToApp={handleConvertWaitlist}
-            />
-          )}
+              {currentTab === 'interviews' && (
+                <InterviewsPage
+                  interviews={interviews}
+                  applications={applications}
+                  resumes={resumes}
+                  onOpenNewInterview={(mode) => {
+                    setEditingInterview(null);
+                    setInterviewModalType(mode || 'interview');
+                    setIsInterviewModalOpen(true);
+                  }}
+                  onEditInterview={(iv) => {
+                    setEditingInterview(iv);
+                    setInterviewModalType(iv.is_walk_in ? 'walk-in' : 'interview');
+                    setIsInterviewModalOpen(true);
+                  }}
+                  onDeleteInterview={handleDeleteInterview}
+                  onOpenFeedback={(iv) => {
+                    setFeedbackInterview(iv);
+                    setIsFeedbackModalOpen(true);
+                  }}
+                  onViewResume={(r) => setViewingResume(r)}
+                />
+              )}
 
-          {currentTab === 'export' && (
-            <ExportPage user={user} applications={applications} />
-          )}
-        </main>
-      </div>
+              {currentTab === 'waitlist' && (
+                <WaitlistPage
+                  waitlist={waitlist}
+                  onOpenNewWaitlist={() => {
+                    setEditingWaitlist(null);
+                    setIsWaitlistModalOpen(true);
+                  }}
+                  onEditWaitlist={(item) => {
+                    setEditingWaitlist(item);
+                    setIsWaitlistModalOpen(true);
+                  }}
+                  onDeleteWaitlist={handleDeleteWaitlist}
+                  onConvertToApp={handleConvertWaitlist}
+                />
+              )}
+
+              {currentTab === 'export' && (
+                <ExportPage user={user} applications={applications} />
+              )}
+
+              {currentTab === 'contribute' && (
+                <ContributePage user={user} />
+              )}
+            </main>
+          </div>
+        </>
+      )}
+
+      {/* Global Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        initialMode={authModalMode}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+      />
 
       {/* Modals */}
       <ApplicationModal

@@ -5,10 +5,7 @@ import {
   CheckCircle2,
   Trash2,
   ExternalLink,
-  ShieldCheck,
-  AlertCircle,
-  Eye,
-  Download
+  Eye
 } from 'lucide-react';
 import type { Resume } from '../types';
 import { api } from '../services/api';

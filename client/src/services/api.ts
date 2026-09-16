@@ -49,15 +49,46 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 export const api = {
   // Auth
-  async login(email?: string, password?: string): Promise<{ token: string; user: User }> {
+  async login(email?: string, password?: string): Promise<{ token: string; user: User; message: string }> {
     return request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password })
     });
   },
 
+  async signup(data: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+    portfolio?: string;
+    bio?: string;
+  }): Promise<{ token: string; user: User; message: string }> {
+    return request('/auth/signup', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async demoLogin(): Promise<{ token: string; user: User; message: string }> {
+    return request('/auth/demo', {
+      method: 'POST'
+    });
+  },
+
   async getMe(): Promise<{ user: User }> {
     return request('/auth/me');
+  },
+
+  async logout(): Promise<{ message: string }> {
+    try {
+      await request('/auth/logout', { method: 'POST' });
+    } catch {
+      // ignore server logout errors
+    } finally {
+      localStorage.removeItem('token');
+    }
+    return { message: 'Logged out successfully' };
   },
 
   // Applications
@@ -289,5 +320,16 @@ export const api = {
   async getPDFReportData(params?: { fromDate?: string; toDate?: string }): Promise<any> {
     const q = new URLSearchParams(params as any).toString();
     return request(`/export/pdf-data${q ? `?${q}` : ''}`);
-  }
+  },
+
+  // ── Convenience aliases (used by App.tsx) ──────────────────────────────
+  async createWaitlist(data: Partial<WaitlistJob>) {
+    return api.createWaitlistJob(data);
+  },
+  async updateWaitlist(id: string, data: Partial<WaitlistJob>) {
+    return api.updateWaitlistJob(id, data);
+  },
+  async deleteWaitlist(id: string) {
+    return api.deleteWaitlistJob(id);
+  },
 };

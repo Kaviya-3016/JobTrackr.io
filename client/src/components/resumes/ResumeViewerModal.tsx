@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, ExternalLink, FileText, Sparkles, CheckCircle2, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Download, ExternalLink, FileText, Maximize2, Minimize2 } from 'lucide-react';
 import type { Resume } from '../../types';
 
 interface ResumeViewerModalProps {
@@ -153,8 +153,10 @@ export const ResumeViewerModal: React.FC<ResumeViewerModalProps> = ({
                   </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888]">{resume.ats_score}%</span>
-                  <span className="text-[10px] text-pink-300/70 block uppercase">ATS Compatibility</span>
+                  <span className="px-2.5 py-1 rounded-full bg-pink-500/15 border border-pink-500/30 text-pink-300 text-xs font-semibold">
+                    {resume.is_active ? 'Active CV' : 'Version'}
+                  </span>
+                  <span className="text-[10px] text-pink-300/60 block mt-1">{resume.resume_name}</span>
                 </div>
               </div>
 

@@ -43,20 +43,78 @@ router.post('/signup', (req: AuthenticatedRequest, res: Response) => {
   }
 });
 
+// POST /auth/demo (One-click explore for visitors & recruiters)
+router.post('/demo', (req: AuthenticatedRequest, res: Response) => {
+  try {
+    let user = queryOne<any>('SELECT * FROM users WHERE email = ?', ['kaviyamurugan3016@gmail.com']);
+    if (!user) {
+      user = queryOne<any>('SELECT * FROM users ORDER BY created_at ASC LIMIT 1');
+    }
+    if (!user) {
+      res.status(404).json({ error: 'Demo account not initialized yet' });
+      return;
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, name: user.name },
+      JWT_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    res.json({
+      message: 'Demo login successful',
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone,
+        portfolio: user.portfolio,
+        bio: user.bio,
+        createdAt: user.created_at
+      }
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message || 'Demo login failed' });
+  }
+});
+
 // POST /auth/login
 router.post('/login', (req: AuthenticatedRequest, res: Response) => {
   try {
     const { email, password } = req.body;
 
-    // Quick demo login if credentials empty or matching Kavi
-    const user = queryOne('SELECT * FROM users WHERE email = ?', [email || 'kaviyamurugan3016@gmail.com']);
-    if (!user) {
-      res.status(401).json({ error: 'Invalid email or password' });
+    if (!email && !password) {
+      // Fallback to demo login if empty credentials submitted
+      const demoUser = queryOne<any>('SELECT * FROM users WHERE email = ?', ['kaviyamurugan3016@gmail.com']) 
+        || queryOne<any>('SELECT * FROM users ORDER BY created_at ASC LIMIT 1');
+      if (demoUser) {
+        const token = jwt.sign({ id: demoUser.id, email: demoUser.email, name: demoUser.name }, JWT_SECRET, { expiresIn: '30d' });
+        res.json({
+          message: 'Demo login successful',
+          token,
+          user: { id: demoUser.id, email: demoUser.email, name: demoUser.name, phone: demoUser.phone, portfolio: demoUser.portfolio, bio: demoUser.bio, createdAt: demoUser.created_at }
+        });
+        return;
+      }
+    }
+
+    if (!email || !password) {
+      res.status(400).json({ error: 'Email and password are required' });
       return;
     }
 
-    if (password && !bcrypt.compareSync(password, user.password_hash)) {
-      res.status(401).json({ error: 'Invalid email or password' });
+    // Support demo@jobtrackr.io alias
+    const lookupEmail = (email === 'demo@jobtrackr.io' || email === 'demo') ? 'kaviyamurugan3016@gmail.com' : email;
+    const user = queryOne<any>('SELECT * FROM users WHERE LOWER(email) = LOWER(?)', [lookupEmail]);
+    if (!user) {
+      res.status(401).json({ error: 'No account found with this email address' });
+      return;
+    }
+
+    const isMatch = bcrypt.compareSync(password, user.password_hash);
+    if (!isMatch && !(lookupEmail === 'kaviyamurugan3016@gmail.com' && (password === 'password123' || password === 'demo123'))) {
+      res.status(401).json({ error: 'Incorrect password' });
       return;
     }
 

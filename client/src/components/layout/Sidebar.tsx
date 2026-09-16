@@ -6,7 +6,8 @@ import {
   FileText,
   CalendarCheck,
   Bookmark,
-  Download
+  Download,
+  GitPullRequest
 } from 'lucide-react';
 
 export type NavTab = 
@@ -16,13 +17,14 @@ export type NavTab =
   | 'resumes'
   | 'interviews'
   | 'waitlist'
-  | 'export';
+  | 'export'
+  | 'contribute';
 
 interface SidebarProps {
   currentTab: NavTab;
   onSelectTab: (tab: NavTab) => void;
   appCount: number;
-  offerCount: number;
+  offerCount?: number;
   interviewCount: number;
 }
 
@@ -30,7 +32,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
   currentTab,
   onSelectTab,
   appCount,
-  offerCount,
   interviewCount
 }) => {
   const navItems = [
@@ -75,6 +76,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Export Center',
       icon: Download,
       badge: 'PDF'
+    },
+    {
+      id: 'contribute' as NavTab,
+      label: 'Contribute to Project',
+      icon: GitPullRequest,
+      badge: 'OSS'
     }
   ];
 
