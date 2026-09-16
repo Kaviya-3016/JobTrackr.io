@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Mail, Lock, User as UserIcon, ArrowRight, Github, Phone, AlertCircle } from 'lucide-react';
+import { X, Mail, Lock, User as UserIcon, ArrowRight, Github, Phone, AlertCircle, Sparkles, Eye, EyeOff, KeyRound } from 'lucide-react';
 import { api } from '../../services/api';
 import type { User } from '../../types';
 
@@ -21,6 +21,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   // Form states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [portfolio, setPortfolio] = useState('');
@@ -103,7 +104,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Tabs */}
-        <div className="grid grid-cols-2 p-1 bg-white/5 border border-pink-500/20 rounded-2xl mb-6">
+        <div className="grid grid-cols-2 p-1 bg-white/5 border border-pink-500/20 rounded-2xl mb-4">
           <button
             type="button"
             onClick={() => { setMode('signin'); setError(null); }}
@@ -128,16 +129,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           </button>
         </div>
 
+        {/* Demo Credentials Quick Fill Box (Sign In Mode) */}
+        {mode === 'signin' && (
+          <div className="mb-4 p-3 rounded-2xl bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-indigo-500/10 border border-pink-500/30 text-xs flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 font-bold text-pink-300 text-[11px]">
+                <KeyRound className="w-3.5 h-3.5 shrink-0" />
+                <span>Default Account:</span>
+              </div>
+              <div className="text-[11px] text-slate-300 truncate mt-0.5">
+                <span className="font-mono text-white">kaviyamurugan3016@gmail.com</span>
+                <span className="text-slate-400"> (PW: <code className="text-pink-300 font-mono">password123</code>)</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('kaviyamurugan3016@gmail.com');
+                setPassword('password123');
+                setError(null);
+              }}
+              className="shrink-0 px-2.5 py-1 text-[11px] font-bold rounded-xl bg-pink-500/20 hover:bg-pink-500/40 text-pink-200 hover:text-white border border-pink-500/40 transition-all cursor-pointer"
+            >
+              Autofill
+            </button>
+          </div>
+        )}
+
         {/* Error Alert */}
         {error && (
-          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-xs mb-5 animate-shake">
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-xs mb-4 animate-shake">
             <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3.5">
           {mode === 'signup' && (
             <div>
               <label className="block text-[11px] font-semibold text-pink-200/80 mb-1.5 uppercase tracking-wider">
@@ -150,8 +178,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Alex Chen"
-                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition-all"
+                  placeholder="e.g. Kaviya Murugan"
+                  className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-400 outline-none transition-all"
                 />
               </div>
             </div>
@@ -168,8 +196,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition-all"
+                placeholder={mode === 'signin' ? 'e.g. kaviyamurugan3016@gmail.com' : 'e.g. yourname@example.com'}
+                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-400 outline-none transition-all"
               />
             </div>
           </div>
@@ -181,57 +209,63 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             <div className="relative">
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition-all"
+                placeholder={mode === 'signin' ? 'Enter password (default: password123)' : 'Create password (min 6 characters)'}
+                className="w-full pl-10 pr-10 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 focus:ring-1 focus:ring-pink-500 rounded-xl text-xs text-white placeholder-slate-400 outline-none transition-all"
               />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
           </div>
 
           {mode === 'signup' && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-semibold text-pink-200/80 mb-1.5 uppercase tracking-wider">
-                    Phone (Optional)
-                  </label>
-                  <div className="relative">
-                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      placeholder="+1 234 567 890"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition-all"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[11px] font-semibold text-pink-200/80 mb-1.5 uppercase tracking-wider">
-                    Portfolio / GitHub
-                  </label>
-                  <div className="relative">
-                    <Github className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                    <input
-                      type="url"
-                      value={portfolio}
-                      onChange={(e) => setPortfolio(e.target.value)}
-                      placeholder="github.com/username"
-                      className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 rounded-xl text-xs text-white placeholder-slate-500 outline-none transition-all"
-                    />
-                  </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-pink-200/80 mb-1.5 uppercase tracking-wider">
+                  Phone (Optional)
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +91 74180 82136"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 rounded-xl text-xs text-white placeholder-slate-400 outline-none transition-all"
+                  />
                 </div>
               </div>
-            </>
+              <div>
+                <label className="block text-[11px] font-semibold text-pink-200/80 mb-1.5 uppercase tracking-wider">
+                  Portfolio / GitHub
+                </label>
+                <div className="relative">
+                  <Github className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                  <input
+                    type="url"
+                    value={portfolio}
+                    onChange={(e) => setPortfolio(e.target.value)}
+                    placeholder="e.g. https://github.com/Kaviya-3016"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-pink-500/20 focus:border-pink-500 rounded-xl text-xs text-white placeholder-slate-400 outline-none transition-all"
+                  />
+                </div>
+              </div>
+            </div>
           )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
+            className="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-[#f09433] via-[#dc2743] to-[#bc1888] hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-pink-600/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -245,8 +279,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </form>
 
         {/* Footer Note */}
-        <p className="text-center text-[11px] text-slate-500 mt-6">
-          100% Open Source under MIT License • Data stays secure & isolated.
+        <p className="text-center text-[11px] text-slate-400 mt-5">
+          100% Open Source under MIT License • Personal data is stored locally.
         </p>
       </div>
     </div>
