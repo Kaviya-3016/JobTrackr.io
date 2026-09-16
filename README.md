@@ -27,33 +27,56 @@ Managing your job search across multiple portals (LinkedIn, Naukri, Wellfound, D
 
 ---
 
-### 2. Built for High Performance — Feature Highlights
+### 2. Fast Onboarding & Account Modal
+*Sign in or create an account with one-click demo credentials autofill, password visibility toggles, and clear, descriptive input placeholders.*
+
+<p align="center">
+  <img src="docs/screenshots/signup-auth-modal.png" alt="JobTrackr.io Authentication Modal" width="480" />
+</p>
+
+---
+
+### 3. Built for High Performance — Feature Highlights
 *Comprehensive feature suite eliminating messy spreadsheets, lost follow-ups, and fragmented resumes.*
 
 ![JobTrackr.io Features Overview](docs/screenshots/features-overview.png)
 
 ---
 
-### 3. Career Analytics Dashboard & Activity Heatmap
+### 4. Career Analytics Dashboard & Activity Heatmap
 *Executive cockpit showcasing total applications, reply accuracy rates, interview conversions, status donut breakdowns, and platform volume charts.*
 
 ![JobTrackr.io Analytics Dashboard](docs/screenshots/analytics-dashboard.png)
 
 ---
 
-### 4. Job Applications Directory
+### 5. Job Applications Directory
 *Centralized directory with auto-incrementing sequential numbers (#S.No), multi-portal filtering, search, reply tracking, and quick actions.*
 
 ![JobTrackr.io Applications Directory](docs/screenshots/applications-directory.png)
 
 ---
 
-### 5. Detailed Application & Walk-in Logger
+### 6. Detailed Application & Walk-in Logger
 *Log comprehensive application metadata including role, company, salary/stipend expectations, interview notes, and in-person walk-in drive venue contacts.*
 
 <p align="center">
   <img src="docs/screenshots/log-application-modal.png" alt="Log New Job Application Modal" width="600" />
 </p>
+
+---
+
+### 7. Wishlist & "Apply Later" Queue
+*Save target job postings, direct application links, CTC expectations, and full job descriptions with one-click conversion to active applications.*
+
+![JobTrackr.io Wishlist Queue](docs/screenshots/wishlist-queue.png)
+
+---
+
+### 8. Export Center (Executive PDF & Raw CSV)
+*Generate professional reports with custom date range filters, response KPI metrics, structured landscape executive PDFs, and spreadsheet CSV downloads.*
+
+![JobTrackr.io Export Center](docs/screenshots/export-center.png)
 
 ---
 
