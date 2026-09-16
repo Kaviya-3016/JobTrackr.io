@@ -3,7 +3,6 @@ import {
   Briefcase,
   Sparkles,
   ArrowRight,
-  ChevronRight,
   Github,
   CheckCircle2,
   BarChart3,
@@ -101,18 +100,6 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Hero Section */}
       <section className="relative z-10 pt-16 pb-20 px-6 max-w-7xl mx-auto text-center">
-        {/* Open Source Pill Badge */}
-        <a
-          href="https://github.com/Kaviya-3016/JobTrackr.io"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-pink-500/10 hover:bg-pink-500/20 border border-pink-500/30 text-pink-300 text-xs font-semibold mb-6 backdrop-blur-md transition-all hover:scale-105"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-[#f09433]" />
-          <span>100% Free & Open Source on GitHub • MIT License</span>
-          <ChevronRight className="w-3 h-3 text-pink-400" />
-        </a>
-
         {/* Hero Title */}
         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.1] mb-6">
           Track Every Application. <br className="hidden sm:inline" />
@@ -124,7 +111,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
         {/* Hero Subtitle */}
         <p className="text-base sm:text-lg md:text-xl text-pink-100/70 max-w-3xl mx-auto leading-relaxed mb-10">
-          The ultimate career intelligence cockpit for software engineers and ambitious job hunters. Built with a <span className="text-pink-200 font-semibold">365-Day GitHub-style contribution heatmap</span>, <span className="text-pink-200 font-semibold">in-person walk-in logs</span>, multi-portal response analytics, and multi-version resume management.
+          The ultimate career intelligence cockpit designed for every ambitious job hunter across all fields and roles. Built with a <span className="text-pink-200 font-semibold">365-day application activity heatmap</span>, <span className="text-pink-200 font-semibold">in-person walk-in logs</span>, multi-portal response analytics, and multi-version resume management.
         </p>
 
         {/* Hero CTAs */}
@@ -143,16 +130,6 @@ export const HomePage: React.FC<HomePageProps> = ({
           >
             <span>Sign In to Account</span>
           </button>
-
-          <a
-            href="https://github.com/Kaviya-3016/JobTrackr.io"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 px-5 py-3.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-pink-500/20 text-white font-semibold text-sm transition-all hover:scale-105"
-          >
-            <Github className="w-4 h-4" />
-            <span>GitHub Repository</span>
-          </a>
         </div>
 
         {/* Interactive Dashboard Preview Card */}
@@ -249,7 +226,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             Everything You Need to Win the Hiring Game
           </h2>
           <p className="text-sm sm:text-base text-pink-200/70">
-            No spreadsheets, no messy bookmarks, no lost follow-ups. JobTrackr.io gives you an unfair advantage in today's competitive tech job market.
+            No spreadsheets, no messy bookmarks, no lost follow-ups. JobTrackr.io gives you an unfair advantage in today's competitive job market.
           </p>
         </div>
 
@@ -272,7 +249,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Interview Retrospectives & STAR Feedback</h3>
             <p className="text-xs text-pink-200/70 leading-relaxed">
-              Log interview rounds, technical evaluation notes, and constructive feedback following the STAR methodology to turn rejections into stepping stones for dream offers.
+              Log interview rounds, evaluation notes, and constructive feedback following the STAR methodology to turn rejections into stepping stones for dream offers.
             </p>
           </div>
 
@@ -305,7 +282,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Multi-CV Resume Hub</h3>
             <p className="text-xs text-pink-200/70 leading-relaxed">
-              Store multiple tailored resumes (SDE, Frontend, Systems) and link specific resumes to applications so you always know which version landed you the interview.
+              Store multiple tailored resumes for different roles and industries, and link specific resumes to applications so you always know which version landed you the interview.
             </p>
           </div>
 
@@ -386,7 +363,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           Ready to Take Command of Your Career?
         </h2>
         <p className="text-sm sm:text-base text-pink-200/70 max-w-2xl mx-auto mb-8">
-          Join developers building consistent application streaks and landing higher-paying offers with full career tracking transparency.
+          Join ambitious job hunters building consistent application streaks and landing higher-paying offers with full career tracking transparency.
         </p>
         <div className="flex flex-wrap items-center justify-center gap-4">
           <button
