@@ -5,7 +5,6 @@
 A free and open-source career intelligence cockpit designed for ambitious job hunters across all fields and roles. JobTrackr.io transforms chaotic job hunting into a data-driven, organized process.
 
 [![GitHub Stars](https://img.shields.io/github/stars/Kaviya-3016/JobTrackr.io)](https://github.com/Kaviya-3016/JobTrackr.io)
-[![License](https://img.shields.io/badge/license-OSS-brightgreen)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Active-success)]()
 
 ---
@@ -103,9 +102,6 @@ Your central command center displays:
 ### Prerequisites
 - Node.js 16+ (for development)
 - Modern web browser
-
-### Live Demo
-Visit [JobTrackr.io](https://jobtrackr.io) to start tracking immediately. No installation needed!
 
 ### Local Development
 
@@ -225,27 +221,18 @@ If JobTrackr.io helped your job search, please give us a star! ⭐
 
 ## 👥 Built With ❤️ By
 
-**Kavi Murugan** - Creator & Maintainer  
+**Kaviya M ** - Creator & Maintainer  
 🔗 [GitHub](https://github.com/Kaviya-3016) | 📧 kaviyamurugan3016@gmail.com
 
 ---
 
-## 🎯 Roadmap
 
-- [ ] Mobile app (iOS/Android)
-- [ ] Calendar integration for interview schedules
-- [ ] Email integration for automatic tracking
-- [ ] AI-powered resume optimization
-- [ ] Interview preparation guides by company
-- [ ] Salary comparison database
-- [ ] Team collaboration features
-- [ ] Interview practice simulator
 
 ---
 
 **Ready to transform your job hunt?**
 
-👉 [Start for Free](https://jobtrackr.io) • 💻 [View on GitHub](https://github.com/Kaviya-3016/JobTrackr.io) • 🤝 [Contribute](CONTRIBUTING.md)
+• 💻 [View on GitHub](https://github.com/Kaviya-3016/JobTrackr.io) • 🤝 [Contribute](CONTRIBUTING.md)
 
 ---
 
